@@ -1,34 +1,33 @@
 package me.yamp;
 
-import static java.lang.Thread.sleep;
-
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.media.AudioAttributes;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import me.yamp.events.OnClickMusicButton;
+import me.yamp.events.OnSeekBarChange;
+import me.yamp.managers.PlayerManager;
 import me.yamp.managers.QueueManager;
 
 public class MainActivity extends AppCompatActivity {
-    public MediaPlayer mediaPlayer;
     public QueueManager queueManager;
+    public PlayerManager playerManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mediaPlayer = new MediaPlayer();
-        AudioAttributes att = new AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build();
-        mediaPlayer.setAudioAttributes(att);
-
         queueManager = new QueueManager(getApplicationContext());
         queueManager.loadQueue();
+
+        playerManager = new PlayerManager(this);
+
+        SeekBar seekBar = findViewById(R.id.seekBar);
+        seekBar.setOnSeekBarChangeListener(new OnSeekBarChange(this));
 
         for (int i = 0; i < queueManager.queue.length; i++) {
             Music m = queueManager.queue[i];
@@ -40,5 +39,20 @@ public class MainActivity extends AppCompatActivity {
             LinearLayout lay = findViewById(R.id.musiclist);
             lay.addView(buttonView);
         }
+    }
+
+    public void updatePlaying(String name) {
+        TextView playingText = findViewById(R.id.musicPlayingText);
+        playingText.setText(name);
+    }
+
+    public void updateSeekBarPosition(int position) {
+        SeekBar seekBar = findViewById(R.id.seekBar);
+        seekBar.setProgress(position, true);
+    }
+
+    public void setSeekBarMax(int maxDuration) {
+        SeekBar seekBar = findViewById(R.id.seekBar);
+        seekBar.setMax(maxDuration);
     }
 }
